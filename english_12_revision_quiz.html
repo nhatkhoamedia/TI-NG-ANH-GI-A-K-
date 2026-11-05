@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ôn Thi Tiếng Anh 12 - THPT Bà Rịa (40 Câu Trắc Nghiệm)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-indigo-700 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white text-indigo-700 p-2 rounded-xl font-extrabold text-xl shadow">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="text-base md:text-lg font-bold leading-tight">THPT BÀ RỊA - ĐỀ CƯỜNG ANH 12</h1>
+                    <p class="text-xs text-indigo-200">Giữa Học Kỳ I (40 Câu Trắc Nghiệm)</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <!-- Mode Indicator / Selector -->
+                <div id="mode-badge" class="hidden md:flex items-center gap-1.5 px-3 py-1 bg-indigo-800 rounded-full text-xs font-medium border border-indigo-500">
+                    <i class="fa-solid fa-gamepad text-amber-300"></i>
+                    <span id="mode-text">Chế độ: Luyện tập</span>
+                </div>
+                
+                <!-- Timer -->
+                <div id="timer-box" class="bg-indigo-900/90 border border-indigo-400/50 px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-2 shadow-inner">
+                    <i class="fa-regular fa-clock text-amber-400"></i>
+                    <span id="time-display" class="font-mono text-amber-300">45:00</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-3 md:p-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+        <!-- Sidebar Navigation & Controls -->
+        <aside class="lg:col-span-1 bg-white p-4 rounded-2xl shadow-sm border border-slate-200 h-fit lg:sticky lg:top-20 order-2 lg:order-1">
+            
+            <!-- Mode Toggle Header -->
+            <div class="mb-4 p-2 bg-slate-100 rounded-xl flex gap-1">
+                <button id="btn-mode-practice" onclick="switchAppMode('practice')" class="flex-1 py-1.5 px-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-sm transition">
+                    <i class="fa-solid fa-book-open mr-1"></i>Luyện tập
+                </button>
+                <button id="btn-mode-test" onclick="switchAppMode('test')" class="flex-1 py-1.5 px-2 text-xs font-semibold rounded-lg text-slate-600 hover:bg-slate-200 transition">
+                    <i class="fa-solid fa-stopwatch mr-1"></i>Thi thử (45m)
+                </button>
+            </div>
+
+            <!-- View Switcher -->
+            <div class="grid grid-cols-2 gap-2 mb-4">
+                <button id="single-view-btn" onclick="setViewMode('single')" class="py-1.5 text-xs font-medium rounded-lg border bg-indigo-50 text-indigo-700 border-indigo-200 transition flex items-center justify-center gap-1">
+                    <i class="fa-regular fa-square"></i> Từng câu
+                </button>
+                <button id="list-view-btn" onclick="setViewMode('list')" class="py-1.5 text-xs font-medium rounded-lg border bg-white text-slate-600 border-slate-200 hover:bg-slate-50 transition flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-bars"></i> Tất cả câu
+                </button>
+            </div>
+
+            <!-- Section Filter -->
+            <div class="mb-4">
+                <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Lọc phần bài học:</label>
+                <select id="section-filter" onchange="filterSection(this.value)" class="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <option value="all">Tất cả 40 câu hỏi</option>
+                    <option value="part1">Part I: Announcement & Leaflets (1-18)</option>
+                    <option value="part2">Part II: Arrangement (19-28)</option>
+                    <option value="part3">Part III: Sentence Completion (29-38)</option>
+                    <option value="part4">Part IV: Reading Comprehension (39-40)</option>
+                </select>
+            </div>
+
+            <!-- Grid of Questions -->
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-slate-600">Sơ đồ câu hỏi</span>
+                <span id="progress-text" class="text-[11px] font-bold px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-md">0/40</span>
+            </div>
+            <div id="question-grid" class="grid grid-cols-5 gap-1.5 max-h-56 lg:max-h-72 overflow-y-auto custom-scrollbar p-1 border rounded-lg bg-slate-50">
+                <!-- Dynamically Populated -->
+            </div>
+
+            <!-- Actions -->
+            <div class="mt-4 pt-3 border-t border-slate-100 space-y-2">
+                <button onclick="submitQuiz()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> Nộp Bài Xem Kết Quả
+                </button>
+                <button onclick="resetQuiz()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-lg transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-rotate-right"></i> Làm lại từ đầu
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Question Area -->
+        <section class="lg:col-span-3 order-1 lg:order-2">
+
+            <!-- Result Summary Card -->
+            <div id="result-box" class="hidden bg-white p-6 rounded-2xl shadow-md border border-slate-200 mb-6 text-center">
+                <div class="inline-flex p-4 bg-indigo-50 text-indigo-600 rounded-full mb-3 text-3xl">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-1">Kết Quả BÀI THI</h2>
+                <p class="text-xs text-slate-500 mb-5">Đã hoàn thành đề kiểm tra giữa học kỳ I Tiếng Anh 12</p>
+                
+                <div class="grid grid-cols-3 gap-3 max-w-md mx-auto mb-5">
+                    <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100">
+                        <span class="block text-2xl font-black text-indigo-600" id="res-score">0/40</span>
+                        <span class="text-[11px] text-indigo-800 font-semibold uppercase">Số câu đúng</span>
+                    </div>
+                    <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100">
+                        <span class="block text-2xl font-black text-emerald-600" id="res-grade">0.0</span>
+                        <span class="text-[11px] text-emerald-800 font-semibold uppercase">Điểm số (Thang 10)</span>
+                    </div>
+                    <div class="bg-amber-50 p-3 rounded-xl border border-amber-100">
+                        <span class="block text-2xl font-black text-amber-600" id="res-time">00:00</span>
+                        <span class="text-[11px] text-amber-800 font-semibold uppercase">Thời gian</span>
+                    </div>
+                </div>
+
+                <p id="res-feedback" class="text-sm font-semibold text-slate-700 mb-4"></p>
+            </div>
+
+            <!-- Passage Context Box (For reading/announcements) -->
+            <div id="passage-card" class="hidden bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-5 relative">
+                <div class="flex items-center gap-2 mb-2 text-indigo-700 font-bold text-xs uppercase tracking-wider border-b pb-2 border-slate-100">
+                    <i class="fa-solid fa-file-lines"></i> <span id="passage-title">Đoạn văn tham chiếu</span>
+                </div>
+                <div id="passage-content" class="text-slate-700 leading-relaxed text-sm bg-slate-50/80 p-4 rounded-xl border border-slate-200/80 font-sans">
+                    <!-- Passage content -->
+                </div>
+            </div>
+
+            <!-- Questions Container -->
+            <div id="quiz-container" class="space-y-5">
+                <!-- Rendered dynamically -->
+            </div>
+
+            <!-- Navigation Controls (Single View) -->
+            <div id="single-nav" class="flex justify-between items-center mt-6 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                <button id="prev-btn" onclick="prevQuestion()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-lg transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Câu trước
+                </button>
+                <span id="current-q-indicator" class="text-xs font-bold text-slate-500">Câu 1 / 40</span>
+                <button id="next-btn" onclick="nextQuestion()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition flex items-center gap-2">
+                    Câu tiếp <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- 40 Questions Data Script -->
+    <script>
+        const fullQuizData = [
+            // PART I: EXERCISE 1 (1-6)
+            {
+                id: 1, section: "part1",
+                passageTitle: "Part I - Exercise 1: INSPIRING TEACHER AWARD 2026",
+                passage: "Is there a teacher you respect the most? Now is your chance to say thank you! (1) ______ Student Council of Sunrise High School invites all students to nominate a teacher for this year's Inspiring Teacher Award...",
+                qNum: "Question 1", question: "Chọn mạo từ phù hợp điền vào vị trí (1):",
+                options: ["A. A", "B. An", "C. The", "D. Ø"], answer: 2,
+                explain: "Trước 'Student Council of Sunrise High School' (Hội học sinh trường Sunrise) là cơ quan/tổ chức xác định -> Dùng mạo từ 'The'."
+            },
+            {
+                id: 2, section: "part1",
+                passageTitle: "Part I - Exercise 1: INSPIRING TEACHER AWARD 2026",
+                passage: "In your nomination, please describe your teacher's (2) ______ teaching methods and supportive attitude...",
+                qNum: "Question 2", question: "Chọn tính từ phù hợp cho vị trí (2):",
+                options: ["A. remaining", "B. boring", "C. discouraging", "D. encouraging"], answer: 3,
+                explain: "'encouraging teaching methods' nghĩa là phương pháp giảng dạy mang tính động viên, khuyến khích."
+            },
+            {
+                id: 3, section: "part1",
+                passageTitle: "Part I - Exercise 1: INSPIRING TEACHER AWARD 2026",
+                passage: "Last year, many students (3) ______ part, and many moving stories were shared.",
+                qNum: "Question 3", question: "Chọn động từ đúng cho vị trí (3):",
+                options: ["A. made", "B. took", "C. did", "D. had"], answer: 1,
+                explain: "Cụm cố định 'take part in' (tham gia). Thì quá khứ đơn của 'take' là 'took'."
+            },
+            {
+                id: 4, section: "part1",
+                passageTitle: "Part I - Exercise 1: INSPIRING TEACHER AWARD 2026",
+                passage: "Write about a moment when this teacher (4) ______ you overcome a difficulty.",
+                qNum: "Question 4", question: "Chọn dạng động từ đúng cho vị trí (4):",
+                options: ["A. helps", "B. is helping", "C. helped", "D. has helped"], answer: 2,
+                explain: "Kể về một khoảnh khắc đã xảy ra trong quá khứ -> Dùng quá khứ đơn 'helped'."
+            },
+            {
+                id: 5, section: "part1",
+                passageTitle: "Part I - Exercise 1: INSPIRING TEACHER AWARD 2026",
+                passage: "Nominees will be judged on their dedication and (5) ______.",
+                qNum: "Question 5", question: "Chọn từ loại đúng cho vị trí (5):",
+                options: ["A. professionally", "B. profession", "C. professional", "D. professionalism"], answer: 3,
+                explain: "Sau liên từ 'and' song song với danh từ 'dedication' ta chọn danh từ 'professionalism' (sự chuyên nghiệp)."
+            },
+            {
+                id: 6, section: "part1",
+                passageTitle: "Part I - Exercise 1: INSPIRING TEACHER AWARD 2026",
+                passage: "Help us honour the teachers we all (6) ______!",
+                qNum: "Question 6", question: "Chọn phrasal verb đúng cho vị trí (6):",
+                options: ["A. look up to", "B. look into", "C. look down on", "D. look over"], answer: 0,
+                explain: "'look up to' có nghĩa là kính trọng, tôn trọng."
+            },
+
+            // PART I: EXERCISE 2 (7-12)
+            {
+                id: 7, section: "part1",
+                passageTitle: "Part I - Exercise 2: VIET NAM CULTURE WEEK 2026",
+                passage: "This year, visitors can explore exhibits on (7) ______ digital platforms, from online galleries to virtual museums.",
+                qNum: "Question 7", question: "Chọn từ đúng điền vào vị trí (7):",
+                options: ["A. confirming", "B. showing", "C. emerging", "D. opening"], answer: 2,
+                explain: "'emerging digital platforms' nghĩa là các nền tảng kỹ thuật số mới nổi/đang phát triển."
+            },
+            {
+                id: 8, section: "part1",
+                passageTitle: "Part I - Exercise 2: VIET NAM CULTURE WEEK 2026",
+                passage: "The event will last seven days instead of three, (8) ______ gives everyone more time to enjoy it.",
+                qNum: "Question 8", question: "Chọn đại từ quan hệ cho vị trí (8):",
+                options: ["A. that", "B. which", "C. what", "D. who"], answer: 1,
+                explain: "'which' dùng thay thế cho cả mệnh đề đứng phía trước sau dấu phẩy."
+            },
+            {
+                id: 9, section: "part1",
+                passageTitle: "Part I - Exercise 2: VIET NAM CULTURE WEEK 2026",
+                passage: "Last year, visitors (9) ______ a water puppet show when the lights suddenly went out...",
+                qNum: "Question 9", question: "Chọn thì động từ đúng cho vị trí (9):",
+                options: ["A. watch", "B. were watching", "C. have watched", "D. are watching"], answer: 1,
+                explain: "Thì quá khứ tiếp diễn 'were watching' mô tả hành động đang diễn ra thì có hành động khác chen vào."
+            },
+            {
+                id: 10, section: "part1",
+                passageTitle: "Part I - Exercise 2: VIET NAM CULTURE WEEK 2026",
+                passage: "Our workshops require (10) ______, innovation and teamwork.",
+                qNum: "Question 10", question: "Chọn từ loại đúng cho vị trí (10):",
+                options: ["A. creatively", "B. creative", "C. create", "D. creativity"], answer: 3,
+                explain: "Cần danh từ 'creativity' (sự sáng tạo) để làm tân ngữ cho động từ 'require' và song song với 'innovation'."
+            },
+            {
+                id: 11, section: "part1",
+                passageTitle: "Part I - Exercise 2: VIET NAM CULTURE WEEK 2026",
+                passage: "Volunteers will support international students who are experiencing culture (11) ______...",
+                qNum: "Question 11", question: "Chọn danh từ phù hợp cho vị trí (11):",
+                options: ["A. shock", "B. surprise", "C. fear", "D. stress"], answer: 0,
+                explain: "Cụm danh từ 'culture shock' có nghĩa là sốc văn hóa."
+            },
+            {
+                id: 12, section: "part1",
+                passageTitle: "Part I - Exercise 2: VIET NAM CULTURE WEEK 2026",
+                passage: "...and all visitors can (12) ______ traditional costumes for photos.",
+                qNum: "Question 12", question: "Chọn cụm động từ đúng cho vị trí (12):",
+                options: ["A. try on", "B. put off", "C. take after", "D. turn down"], answer: 0,
+                explain: "'try on' nghĩa là thử (trang phục, quần áo)."
+            },
+
+            // PART I: EXERCISE 3 (13-18)
+            {
+                id: 13, section: "part1",
+                passageTitle: "Part I - Exercise 3: GREEN HOMES AT LOTUS PARK",
+                passage: "Lotus Park is (13) ______ ideal place for families who love nature...",
+                qNum: "Question 13", question: "Chọn mạo từ đúng cho vị trí (13):",
+                options: ["A. a", "B. an", "C. the", "D. Ø"], answer: 1,
+                explain: "Từ 'ideal' bắt đầu bằng nguyên âm /aɪ/ nên chọn mạo từ 'an'."
+            },
+            {
+                id: 14, section: "part1",
+                passageTitle: "Part I - Exercise 3: GREEN HOMES AT LOTUS PARK",
+                passage: "Enjoy (14) ______ public spaces such as parks, gardens and tree-lined streets.",
+                qNum: "Question 14", question: "Chọn tính từ phù hợp cho vị trí (14):",
+                options: ["A. disgusting", "B. tiring", "C. relaxing", "D. frightening"], answer: 2,
+                explain: "'relaxing public spaces' nghĩa là không gian công cộng mang lại cảm giác thư giãn."
+            },
+            {
+                id: 15, section: "part1",
+                passageTitle: "Part I - Exercise 3: GREEN HOMES AT LOTUS PARK",
+                passage: "All homes have solar panels, so residents no longer depend (15) ______ fossil fuels for electricity.",
+                qNum: "Question 15", question: "Chọn giới từ đúng cho vị trí (15):",
+                options: ["A. on", "B. in", "C. at", "D. with"], answer: 0,
+                explain: "Cụm 'depend on' nghĩa là phụ thuộc vào."
+            },
+            {
+                id: 16, section: "part1",
+                passageTitle: "Part I - Exercise 3: GREEN HOMES AT LOTUS PARK",
+                passage: "Our management team is committed to environmental (16) ______...",
+                qNum: "Question 16", question: "Chọn dạng từ đúng cho vị trí (16):",
+                options: ["A. protecting", "B. protective", "C. protect", "D. protection"], answer: 3,
+                explain: "Cần danh từ 'protection' đứng sau tính từ 'environmental' để tạo thành cụm danh từ 'environmental protection' (sự bảo vệ môi trường)."
+            },
+            {
+                id: 17, section: "part1",
+                passageTitle: "Part I - Exercise 3: GREEN HOMES AT LOTUS PARK",
+                passage: "...and helps residents (17) ______ their energy use.",
+                qNum: "Question 17", question: "Chọn phrasal verb đúng cho vị trí (17):",
+                options: ["A. cut down", "B. set off", "C. look after", "D. take over"], answer: 0,
+                explain: "'cut down' nghĩa là cắt giảm (việc sử dụng năng lượng)."
+            },
+            {
+                id: 18, section: "part1",
+                passageTitle: "Part I - Exercise 3: GREEN HOMES AT LOTUS PARK",
+                passage: "Lotus Park is perfect for families who want to (18) ______ a greener lifestyle.",
+                qNum: "Question 18", question: "Chọn động từ đúng cho vị trí (18):",
+                options: ["A. make", "B. do", "C. lead", "D. take"], answer: 2,
+                explain: "Collocation: 'lead a lifestyle' (sống một lối sống)."
+            },
+
+            // PART II: ARRANGEMENT (19-28)
+            {
+                id: 19, section: "part2",
+                passageTitle: "Part II - Sắp xếp đoạn hội thoại",
+                passage: "a. Anna: That sounds really fascinating! I'd love to hear more...<br>b. Anna: Hey Minh! You look busy - what are you working on?<br>c. Minh: Oh, hi Anna! I'm putting together a presentation on how Vietnamese culture is gaining recognition internationally.",
+                qNum: "Question 19", question: "Sắp xếp đoạn hội thoại giữa Anna và Minh:",
+                options: ["A. c-a-b", "B. b-c-a", "C. c-b-a", "D. b-a-c"], answer: 1,
+                explain: "Bắt đầu bằng lời hỏi thăm b -> Trả lời của Minh c -> Phản hồi hào hứng của Anna a (b-c-a)."
+            },
+            {
+                id: 20, section: "part2",
+                passageTitle: "Part II - Sắp xếp đoạn hội thoại",
+                passage: "a. Tom: Sure, just walk down Green Avenue for about five minutes...<br>b. Sarah: Hi, I'm new in town - is there a place where people can drop off recyclable materials?<br>c. Sarah: That's great to hear! Thanks a lot for your help.",
+                qNum: "Question 20", question: "Sắp xếp đoạn hội thoại chỉ đường giữa Tom và Sarah:",
+                options: ["A. c-a-b", "B. c-b-a", "C. b-a-c", "D. a-c-b"], answer: 2,
+                explain: "Sarah hỏi đường b -> Tom hướng dẫn a -> Sarah cảm ơn c (b-a-c)."
+            },
+            {
+                id: 21, section: "part2",
+                passageTitle: "Part II - Sắp xếp đoạn hội thoại về Bác Hồ",
+                passage: "a. Nam: Yes, I truly admire President Ho Chi Minh for his wisdom, humility...<br>b. Nam: His speeches and actions still inspire generations...<br>c. Linh: Is there a president you really admire?<br>d. Linh: Definitely! His legacy continues to live on in our hearts.<br>e. Linh: I agree. He was not only a great leader but also a symbol of national unity.",
+                qNum: "Question 21", question: "Trật tự đúng cho đoạn hội thoại giữa Linh và Nam:",
+                options: ["A. c-a-e-b-d", "B. b-e-c-a-d", "C. c-d-a-b-e", "D. c-b-a-e-d"], answer: 0,
+                explain: "Mở đầu hỏi c -> Đáp a -> Đồng ý ý kiến e -> Nói tiếp về sự truyền cảm hứng b -> Khẳng định kết d (c-a-e-b-d)."
+            },
+            {
+                id: 22, section: "part2",
+                passageTitle: "Part II - Sắp xếp đoạn hội thoại ăn uống ở Việt Nam",
+                passage: "a. Tom: I really like that custom. In my country, each person usually has their own plate.<br>b. Mai: Tom, you've been in Viet Nam for three months now. What has surprised you most about our culture?<br>c. Mai: That's true. In Viet Nam, sharing food is a way of showing care for each other.<br>d. Mai: How interesting! Learning about each other's customs really helps us understand...<br>e. Tom: Probably the way families eat together. Everyone shares dishes from the middle of the table.",
+                qNum: "Question 22", question: "Trật tự đúng cho đoạn hội thoại giữa Mai và Tom:",
+                options: ["A. c-b-a-e-d", "B. b-e-d-a-c", "C. b-e-c-a-d", "D. c-d-a-b-e"], answer: 2,
+                explain: "Mai hỏi cảm nhận b -> Tom chia sẻ việc ăn uống chung e -> Mai giải thích ý nghĩa c -> Tom so sánh với nước mình a -> Mai khen ngợi d (b-e-c-a-d)."
+            },
+            {
+                id: 23, section: "part2",
+                passageTitle: "Part II - Sắp xếp bức thư đề cử giải thưởng",
+                passage: "Dear Mr. Johnson,<br>a. Most importantly, even when the team faces challenges, he supports us...<br>b. I am writing to recommend my manager, Mr. David Lee, for this year's Best Leader Award.<br>c. Moreover, his ability to remain calm in stressful situations...<br>d. If you need any further information, please do not hesitate to contact me.<br>e. First of all, he is fair and always willing to listen to everyone's ideas.",
+                qNum: "Question 23", question: "Trật tự đúng của bức thư đề cử:",
+                options: ["A. a-d-e-b-c", "B. b-e-d-c-a", "C. d-a-e-b-c", "D. b-e-c-a-d"], answer: 3,
+                explain: "Mục đích thư b -> Ý đầu tiên e -> Bổ sung c -> Quan trọng nhất a -> Lời kết d (b-e-c-a-d)."
+            },
+            {
+                id: 24, section: "part2",
+                passageTitle: "Part II - Sắp xếp bức thư thông báo sự kiện văn hóa",
+                passage: "Dear Sir/Madam,<br>a. These events will take place in over 20 countries...<br>b. We are delighted to inform you that our organisation has launched a global initiative...<br>c. The first showcase is scheduled to begin in Paris...<br>d. Should you wish to receive updates or invitations...<br>e. By participating, international audiences will gain deeper insights...",
+                qNum: "Question 24", question: "Trật tự đúng cho bức thư gửi đối tác:",
+                options: ["A. b-a-e-c-d", "B. b-e-d-c-a", "C. a-b-e-c-d", "D. c-b-a-e-d"], answer: 0,
+                explain: "Thông báo b -> Nêu địa điểm a -> Lợi ích e -> Lịch trình đầu tiên c -> Lời mời đăng ký d (b-a-e-c-d)."
+            },
+            {
+                id: 25, section: "part2",
+                passageTitle: "Part II - Sắp xếp bài viết chia sẻ kinh nghiệm tình nguyện",
+                passage: "a. She spends her days organising activities, listening to people's problems...<br>b. Spending a month volunteering at the local community centre introduced me to someone I truly admire...<br>c. Her kindness and dedication deeply impressed me...<br>d. This experience, therefore, has taught me the true meaning of generosity...<br>e. Before that, I had never realised how much patience and compassion are required...",
+                qNum: "Question 25", question: "Trật tự đoạn văn tình nguyện:",
+                options: ["A. b-e-a-c-d", "B. e-b-c-a-d", "C. b-c-a-d-e", "D. e-a-b-c-d"], answer: 0,
+                explain: "Mở đầu trải nghiệm b -> Suy nghĩ trước đó e -> Kể về nhân vật a -> Ấn tượng c -> Bài học rút ra d (b-e-a-c-d)."
+            },
+            {
+                id: 26, section: "part2",
+                passageTitle: "Part II - Sắp xếp bài viết về chương trình tình nguyện xanh",
+                passage: "a. I had never imagined that contributing to a cleaner city would require so much effort...<br>b. I spent my days collecting plastic waste, planting trees along pavements...<br>c. That experience has made me more conscious of my environmental impact...<br>d. Participating in a two-week eco-volunteer programme in the city completely changed the way I view urban living.<br>e. The work was physically tiring, especially under the scorching sun...",
+                qNum: "Question 26", question: "Trật tự chuẩn của bài viết eco-volunteer:",
+                options: ["A. b-e-d-c-a", "B. d-b-e-a-c", "C. b-c-a-d-e", "D. d-c-e-b-a"], answer: 1,
+                explain: "Câu chủ đề d -> Hoạt động chi tiết b -> Khó khăn e -> Nhận thức a -> Kết luận c (d-b-e-a-c)."
+            },
+            {
+                id: 27, section: "part2",
+                passageTitle: "Part II - Sắp xếp đoạn văn về người mẹ",
+                passage: "a. She has balanced her work and home responsibilities skillfully...<br>b. Her unwavering love and sacrifices have shaped me into the person I am today...<br>c. Because of all this, my mum is truly the person I respect the most in my life.<br>d. Over the years, my mum has shown incredible strength and dedication in raising our family...<br>e. Understanding the importance of education, she has supported and encouraged me...",
+                qNum: "Question 27", question: "Trật tự hợp lý bài viết về mẹ:",
+                options: ["A. b-a-e-c-d", "B. e-a-d-b-c", "C. d-e-c-b-a", "D. d-a-e-b-c"], answer: 3,
+                explain: "Giới thiệu chung về mẹ d -> Sự cân bằng công việc & gia đình a -> Sự ủng hộ học tập e -> Tình yêu thương b -> Tình cảm tôn kính c (d-a-e-b-c)."
+            },
+            {
+                id: 28, section: "part2",
+                passageTitle: "Part II - Sắp xếp bài viết về thành phố thông minh Solviera",
+                passage: "a. These forward-thinking innovations have not only slashed energy consumption...<br>b. In recent years, the city of Solviera has emerged as a global model for green and smart living...<br>c. In a bid to reduce carbon emissions..., policymakers have integrated AI-powered waste management...<br>d. Today, Solviera stands as a thriving urban ecosystem...<br>e. Traditional concrete structures have been retrofitted with green facades...",
+                qNum: "Question 28", question: "Trật tự đúng về thành phố Solviera:",
+                options: ["A. b-a-e-c-d", "B. e-a-d-c-b", "C. d-e-c-b-a", "D. b-e-c-a-d"], answer: 3,
+                explain: "Giới thiệu thành phố b -> Cải tạo tòa nhà e -> Tích hợp AI c -> Đánh giá kết quả a -> Kết luận vị thế d (b-e-c-a-d)."
+            },
+
+            // PART III: PHRASE, CLAUSE AND SENTENCE COMPLETION (29-38)
+            {
+                id: 29, section: "part3",
+                passageTitle: "Part III - Exercise 1: Vietnamese Culture Changes",
+                passage: "Although globalisation has introduced new lifestyles, (29) ______, especially during major festivals like Tet.",
+                qNum: "Question 29", question: "Chọn mệnh đề hoàn thành vị trí (29):",
+                options: [
+                    "A. Vietnamese society has increasingly moved away from ancestral customs",
+                    "B. modern influences are gradually reshaping how they are expressed in Viet Nam",
+                    "C. some younger Vietnamese are beginning to drift away from traditional family values",
+                    "D. Vietnamese people continue to cherish family bonds and ancestral customs"
+                ], answer: 1,
+                explain: "Nối tiếp ý tương phản về ảnh hưởng của toàn cầu hóa lên văn hóa Việt Nam (B)."
+            },
+            {
+                id: 30, section: "part3",
+                passageTitle: "Part III - Exercise 1: Vietnamese Culture Changes",
+                passage: "(30) ______, these customs might have faded away. Nowadays, Vietnamese fashion designers combine the ao dai with modern elements.",
+                qNum: "Question 30", question: "Chọn câu hoàn thành vị trí (30):",
+                options: [
+                    "A. Had the younger generation not started promoting Vietnamese folk music and traditional clothing",
+                    "B. If the younger generation does not promote folk music and traditional clothing online",
+                    "C. If the younger generation continues to promote Vietnamese folk music",
+                    "D. If young people promote traditional Vietnamese music and clothing on platforms like TikTok and YouTube"
+                ], answer: 3,
+                explain: "Mệnh đề điều kiện phù hợp ngữ cảnh thế hệ trẻ quảng bá văn hóa truyền thống trên MXH."
+            },
+            {
+                id: 31, section: "part3",
+                passageTitle: "Part III - Exercise 1: Vietnamese Culture Changes",
+                passage: "...combine the ao dai with modern elements, (31) ______.",
+                qNum: "Question 31", question: "Chọn cụm từ phù hợp vị trí (31):",
+                options: [
+                    "A. inspired by the past of these designs blend trendy aesthetics",
+                    "B. which designing fashion that embraces modern trends",
+                    "C. creating styles that are both trendy and respectful of the past",
+                    "D. that creating various styles which are trendy"
+                ], answer: 2,
+                explain: "Dùng rút gọn mệnh đề dạng V-ing 'creating styles...' làm rõ nghĩa cho việc kết hợp áo dài với yếu tố hiện đại."
+            },
+            {
+                id: 32, section: "part3",
+                passageTitle: "Part III - Exercise 1: Vietnamese Culture Changes",
+                passage: "(32) ______. This unique adaptability is what makes Vietnamese culture vibrant and enduring.",
+                qNum: "Question 32", question: "Chọn câu đảo ngữ phù hợp cho vị trí (32):",
+                options: [
+                    "A. Hardly ever do we find a culture that rejects both its past and any change",
+                    "B. Under no circumstances can a culture ignore the importance of both tradition and progress",
+                    "C. Seldom we witnessed a society that masters the art of blending heritage with modernity",
+                    "D. Rarely do we see a culture so adept at balancing tradition and innovation"
+                ], answer: 3,
+                explain: "Cấu trúc đảo ngữ với 'Rarely do we see...' (Hiếm khi ta thấy một nền văn hóa giỏi cân bằng giữa truyền thống và đổi mới)."
+            },
+            {
+                id: 33, section: "part3",
+                passageTitle: "Part III - Exercise 1: Vietnamese Culture Changes",
+                passage: "In conclusion, (33) ______. It evolves with the world yet remains deeply rooted in national identity.",
+                qNum: "Question 33", question: "Chọn mệnh đề phù hợp vị trí (33):",
+                options: [
+                    "A. modern Vietnamese culture has abandoned historical traditions",
+                    "B. Vietnamese society, exemplifying how historical customs coexist",
+                    "C. Vietnamese culture in modern times is a harmonious blend of past and present",
+                    "D. the culture of Viet Nam today reflecting a delicate balance between heritage and modernity"
+                ], answer: 3,
+                explain: "Cụm danh từ/mệnh đề tóm tắt: 'the culture of Viet Nam today reflecting a delicate balance...'."
+            },
+
+            // Exercise 2: Tran Thi Lan's Mobile Library (34-38)
+            {
+                id: 34, section: "part3",
+                passageTitle: "Part III - Exercise 2: Tran Thi Lan's Mobile Library",
+                passage: "Tran Thi Lan grew up in a poor village... As a child, she borrowed every book she could find, (34) ______.",
+                qNum: "Question 34", question: "Chọn cụm từ hoàn thành vị trí (34):",
+                options: [
+                    "A. which reading them again and again late into the night",
+                    "B. read them again and again late into the night",
+                    "C. she read them again and again late into the night",
+                    "D. reading them again and again late into the night"
+                ], answer: 3,
+                explain: "Dùng mệnh đề phân từ V-ing 'reading them again...' diễn tả hành động song song/kết quả."
+            },
+            {
+                id: 35, section: "part3",
+                passageTitle: "Part III - Exercise 2: Tran Thi Lan's Mobile Library",
+                passage: "...she saw children (35) ______. Deeply moved, she decided to act.",
+                qNum: "Question 35", question: "Chọn cụm từ đúng vị trí (35):",
+                options: [
+                    "A. who sharing one old textbook among five of them",
+                    "B. sharing one old textbook among five of them",
+                    "C. were sharing one old textbook among five of them",
+                    "D. to share one old textbook among five of them"
+                ], answer: 1,
+                explain: "Cấu trúc 'see somebody doing something' -> 'see children sharing...'."
+            },
+            {
+                id: 36, section: "part3",
+                passageTitle: "Part III - Exercise 2: Tran Thi Lan's Mobile Library",
+                passage: "In 2010, she turned an old van into a mobile library, (36) ______.",
+                qNum: "Question 36", question: "Chọn mệnh đề quan hệ cho vị trí (36):",
+                options: [
+                    "A. it carried hundreds of books to children in mountain villages",
+                    "B. that carried hundreds of books to children in mountain villages",
+                    "C. which carried hundreds of books to children in mountain villages",
+                    "D. which carrying hundreds of books to children in mountain villages"
+                ], answer: 2,
+                explain: "Mệnh đề quan hệ không xác định dùng 'which + V' đứng sau dấu phẩy bổ nghĩa cho 'a mobile library'."
+            },
+            {
+                id: 37, section: "part3",
+                passageTitle: "Part III - Exercise 2: Tran Thi Lan's Mobile Library",
+                passage: "At first, the project faced many difficulties. (37) ______. Lan, however, refused to give up...",
+                qNum: "Question 37", question: "Chọn câu điền vào vị trí (37):",
+                options: [
+                    "A. Everything went smoothly from the very first day",
+                    "B. Many local businesses offered her money immediately",
+                    "C. Children in the mountains showed no interest in reading",
+                    "D. The van often broke down, and she had little money for new books"
+                ], answer: 3,
+                explain: "Nêu lên khó khăn cụ thể của dự án: xe tải hay hỏng và thiếu kinh phí mua sách mới."
+            },
+            {
+                id: 38, section: "part3",
+                passageTitle: "Part III - Exercise 2: Tran Thi Lan's Mobile Library",
+                passage: "When asked about her success, Lan says: '(38) ______, the book bus would never have travelled so far.'",
+                qNum: "Question 38", question: "Chọn cấu trúc câu điều kiện đảo ngữ vị trí (38):",
+                options: [
+                    "A. Had it not been for the support of her community",
+                    "B. If it is not for the support of her community",
+                    "C. Unless her community had not supported her",
+                    "D. Without her community had supported her"
+                ], answer: 0,
+                explain: "Cấu trúc đảo ngữ câu điều kiện loại 3: 'Had it not been for + N' (Nếu không có sự hỗ trợ từ cộng đồng)."
+            },
+
+            // PART IV: READING COMPREHENSION (39-40)
+            {
+                id: 39, section: "part4",
+                passageTitle: "Part IV - Reading: Greener Cities for a Growing Population",
+                passage: "As urban populations continue to expand at a rapid pace, cities are facing escalating pressure on both their infrastructure and natural resources. In response, numerous metropolitan areas around the globe are implementing a range of green living initiatives...",
+                qNum: "Question 39", question: "Từ 'implementing' trong đoạn 1 gần nghĩa nhất với:",
+                options: ["A. aligning with", "B. coming up", "C. turning down", "D. carrying out"], answer: 3,
+                explain: "'implement' (thực thi, triển khai) = 'carry out'."
+            },
+            {
+                id: 40, section: "part4",
+                passageTitle: "Part IV - Reading: Greener Cities for a Growing Population",
+                passage: "Bài đọc thảo luận về các giải pháp như giao thông công cộng, không gian xanh, giảm thiểu rác thải và năng lượng tái tạo nhằm xây dựng đô thị bền vững.",
+                qNum: "Question 40", question: "Câu nào sau đây tóm tắt đúng nhất toàn bộ bài đọc?",
+                options: [
+                    "A. Public transport is the most effective solution to all urban environmental problems.",
+                    "B. Cities can become greener by improving public transport, creating green spaces, and reducing waste and fossil fuel use.",
+                    "C. Green spaces mainly help to make cities look more attractive.",
+                    "D. Governments should ban private cars from all city centres."
+                ], answer: 1,
+                explain: "Tóm tắt đầy đủ các giải pháp xanh được nêu trong bài: giao thông, mảng xanh, giảm rác thải và nhiên liệu hóa thạch (Option B)."
+            }
+        ];
+
+        // App States
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let viewMode = 'single'; // 'single' | 'list'
+        let appMode = 'practice'; // 'practice' | 'test'
+        let filteredQuestions = [...fullQuizData];
+        let timerInterval = null;
+        let timeRemaining = 45 * 60; // 45 minutes in seconds
+        let isSubmitted = false;
+
+        window.onload = function() {
+            renderQuestionNav();
+            renderQuiz();
+            startTimer();
+        };
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (appMode === 'test') {
+                    timeRemaining--;
+                    if (timeRemaining <= 0) {
+                        timeRemaining = 0;
+                        clearInterval(timerInterval);
+                        alert("Hết giờ làm bài! Hệ thống sẽ tự động nộp bài.");
+                        submitQuiz();
+                    }
+                } else {
+                    timeRemaining++; // Count up in practice mode
+                }
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const mins = String(Math.floor(timeRemaining / 60)).padStart(2, '0');
+            const secs = String(timeRemaining % 60).padStart(2, '0');
+            document.getElementById('time-display').innerText = `${mins}:${secs}`;
+        }
+
+        function switchAppMode(mode) {
+            if (isSubmitted) {
+                alert("Bạn đã nộp bài. Vui lòng bấm 'Làm lại từ đầu' để bắt đầu chế độ mới.");
+                return;
+            }
+            appMode = mode;
+            document.getElementById('mode-text').innerText = mode === 'practice' ? 'Chế độ: Luyện tập' : 'Chế độ: Thi thử (45 phút)';
+            
+            // Buttons UI
+            if (mode === 'practice') {
+                document.getElementById('btn-mode-practice').className = 'flex-1 py-1.5 px-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-sm transition';
+                document.getElementById('btn-mode-test').className = 'flex-1 py-1.5 px-2 text-xs font-semibold rounded-lg text-slate-600 hover:bg-slate-200 transition';
+                timeRemaining = 0;
+            } else {
+                document.getElementById('btn-mode-test').className = 'flex-1 py-1.5 px-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white shadow-sm transition';
+                document.getElementById('btn-mode-practice').className = 'flex-1 py-1.5 px-2 text-xs font-semibold rounded-lg text-slate-600 hover:bg-slate-200 transition';
+                timeRemaining = 45 * 60;
+            }
+            startTimer();
+            renderQuiz();
+        }
+
+        function setViewMode(mode) {
+            viewMode = mode;
+            document.getElementById('single-view-btn').className = mode === 'single'
+                ? 'py-1.5 text-xs font-medium rounded-lg border bg-indigo-50 text-indigo-700 border-indigo-200 transition flex items-center justify-center gap-1'
+                : 'py-1.5 text-xs font-medium rounded-lg border bg-white text-slate-600 border-slate-200 hover:bg-slate-50 transition flex items-center justify-center gap-1';
+            
+            document.getElementById('list-view-btn').className = mode === 'list'
+                ? 'py-1.5 text-xs font-medium rounded-lg border bg-indigo-50 text-indigo-700 border-indigo-200 transition flex items-center justify-center gap-1'
+                : 'py-1.5 text-xs font-medium rounded-lg border bg-white text-slate-600 border-slate-200 hover:bg-slate-50 transition flex items-center justify-center gap-1';
+
+            document.getElementById('single-nav').style.display = mode === 'single' ? 'flex' : 'none';
+            renderQuiz();
+        }
+
+        function filterSection(sec) {
+            if (sec === 'all') filteredQuestions = [...fullQuizData];
+            else filteredQuestions = fullQuizData.filter(q => q.section === sec);
+            
+            currentQuestionIndex = 0;
+            renderQuestionNav();
+            renderQuiz();
+        }
+
+        function renderQuestionNav() {
+            const grid = document.getElementById('question-grid');
+            grid.innerHTML = '';
+
+            filteredQuestions.forEach((q, idx) => {
+                const btn = document.createElement('button');
+                const isAnswered = userAnswers[q.id] !== undefined;
+
+                let cls = "h-8 text-xs font-bold rounded-lg border transition flex items-center justify-center ";
+
+                if (isSubmitted || (appMode === 'practice' && isAnswered)) {
+                    if (userAnswers[q.id] === q.answer) {
+                        cls += "bg-emerald-500 text-white border-emerald-600";
+                    } else if (isAnswered) {
+                        cls += "bg-rose-500 text-white border-rose-600";
+                    } else {
+                        cls += "bg-slate-100 text-slate-400 border-slate-200";
+                    }
+                } else if (isAnswered) {
+                    cls += "bg-indigo-600 text-white border-indigo-600";
+                } else {
+                    cls += "bg-white text-slate-700 border-slate-200 hover:bg-slate-100";
+                }
+
+                if (viewMode === 'single' && idx === currentQuestionIndex) {
+                    cls += " ring-2 ring-indigo-500 ring-offset-1";
+                }
+
+                btn.className = cls;
+                btn.innerText = q.id;
+                btn.onclick = () => {
+                    currentQuestionIndex = idx;
+                    if (viewMode === 'list') {
+                        document.getElementById(`q-card-${q.id}`)?.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                        renderQuiz();
+                    }
+                };
+                grid.appendChild(btn);
+            });
+
+            document.getElementById('progress-text').innerText = `${Object.keys(userAnswers).length}/${fullQuizData.length}`;
+        }
+
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            const passageCard = document.getElementById('passage-card');
+            container.innerHTML = '';
+
+            if (filteredQuestions.length === 0) {
+                container.innerHTML = `<div class="p-8 text-center text-slate-400">Không tìm thấy câu hỏi phù hợp.</div>`;
+                passageCard.classList.add('hidden');
+                return;
+            }
+
+            if (viewMode === 'single') {
+                const q = filteredQuestions[currentQuestionIndex];
+                renderPassage(q);
+                container.appendChild(createQuestionCard(q, currentQuestionIndex));
+
+                document.getElementById('current-q-indicator').innerText = `Câu ${currentQuestionIndex + 1} / ${filteredQuestions.length}`;
+                document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+                document.getElementById('next-btn').disabled = currentQuestionIndex === filteredQuestions.length - 1;
+                document.getElementById('prev-btn').style.opacity = currentQuestionIndex === 0 ? '0.4' : '1';
+                document.getElementById('next-btn').style.opacity = currentQuestionIndex === filteredQuestions.length - 1 ? '0.4' : '1';
+            } else {
+                passageCard.classList.add('hidden');
+                filteredQuestions.forEach((q, idx) => {
+                    container.appendChild(createQuestionCard(q, idx, true));
+                });
+            }
+
+            renderQuestionNav();
+        }
+
+        function renderPassage(q) {
+            const passageCard = document.getElementById('passage-card');
+            if (q.passage) {
+                passageCard.classList.remove('hidden');
+                document.getElementById('passage-title').innerText = q.passageTitle || "Nội dung tham chiếu";
+                document.getElementById('passage-content').innerHTML = q.passage;
+            } else {
+                passageCard.classList.add('hidden');
+            }
+        }
+
+        function createQuestionCard(q, idx, showInlinePassage = false) {
+            const card = document.createElement('div');
+            card.id = `q-card-${q.id}`;
+            card.className = "bg-white p-5 md:p-6 rounded-2xl shadow-sm border border-slate-200 transition";
+
+            let html = '';
+
+            if (showInlinePassage && q.passage) {
+                html += `
+                    <div class="mb-4 p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 leading-relaxed">
+                        <span class="font-bold text-indigo-600 block mb-1">${q.passageTitle}</span>
+                        ${q.passage}
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="flex items-center justify-between mb-3">
+                    <span class="px-2.5 py-1 bg-indigo-50 text-indigo-700 font-extrabold text-xs rounded-lg">
+                        ${q.qNum} (Câu ${q.id})
+                    </span>
+                </div>
+                <h3 class="text-sm md:text-base font-bold text-slate-800 mb-4">${q.question}</h3>
+                <div class="space-y-2">
+            `;
+
+            const isAnswered = userAnswers[q.id] !== undefined;
+            const showFeedback = isSubmitted || (appMode === 'practice' && isAnswered);
+
+            q.options.forEach((opt, optIdx) => {
+                const isSelected = userAnswers[q.id] === optIdx;
+                let optCls = "w-full text-left p-3 rounded-xl border text-xs md:text-sm font-medium transition flex items-center justify-between ";
+
+                if (showFeedback) {
+                    if (optIdx === q.answer) {
+                        optCls += "bg-emerald-50 border-emerald-500 text-emerald-800 font-bold";
+                    } else if (isSelected) {
+                        optCls += "bg-rose-50 border-rose-500 text-rose-800";
+                    } else {
+                        optCls += "bg-slate-50 border-slate-200 text-slate-400 opacity-60";
+                    }
+                } else {
+                    if (isSelected) {
+                        optCls += "bg-indigo-50 border-indigo-600 text-indigo-900 font-bold shadow-sm";
+                    } else {
+                        optCls += "bg-white border-slate-200 text-slate-700 hover:bg-slate-50";
+                    }
+                }
+
+                html += `
+                    <button onclick="selectOption(${q.id}, ${optIdx})" ${isSubmitted ? 'disabled' : ''} class="${optCls}">
+                        <span>${opt}</span>
+                        ${showFeedback && optIdx === q.answer ? '<i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>' : ''}
+                        ${showFeedback && isSelected && optIdx !== q.answer ? '<i class="fa-solid fa-circle-xmark text-rose-600 text-base"></i>' : ''}
+                    </button>
+                `;
+            });
+
+            html += `</div>`;
+
+            if (showFeedback) {
+                html += `
+                    <div class="mt-4 p-3 bg-amber-50/80 border border-amber-200 rounded-xl text-xs text-amber-900 leading-relaxed">
+                        <strong class="font-bold flex items-center gap-1 text-amber-800 mb-1">
+                            <i class="fa-solid fa-lightbulb"></i> Giải thích:
+                        </strong>
+                        ${q.explain}
+                    </div>
+                `;
+            }
+
+            card.innerHTML = html;
+            return card;
+        }
+
+        function selectOption(qId, optIdx) {
+            if (isSubmitted) return;
+            userAnswers[qId] = optIdx;
+            renderQuiz();
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuiz();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < filteredQuestions.length - 1) {
+                currentQuestionIndex++;
+                renderQuiz();
+            }
+        }
+
+        function submitQuiz() {
+            if (isSubmitted) return;
+
+            const answeredCount = Object.keys(userAnswers).length;
+            if (answeredCount < fullQuizData.length) {
+                if (!confirm(`Bạn mới trả lời ${answeredCount}/${fullQuizData.length} câu. Bạn vẫn muốn nộp bài?`)) {
+                    return;
+                }
+            }
+
+            clearInterval(timerInterval);
+            isSubmitted = true;
+
+            let correctCount = 0;
+            fullQuizData.forEach(q => {
+                if (userAnswers[q.id] === q.answer) correctCount++;
+            });
+
+            const grade = ((correctCount / fullQuizData.length) * 10).toFixed(1);
+
+            document.getElementById('res-score').innerText = `${correctCount}/${fullQuizData.length}`;
+            document.getElementById('res-grade').innerText = grade;
+
+            let timeText = "";
+            if (appMode === 'test') {
+                const usedSecs = (45 * 60) - timeRemaining;
+                const mins = String(Math.floor(usedSecs / 60)).padStart(2, '0');
+                const secs = String(usedSecs % 60).padStart(2, '0');
+                timeText = `${mins}:${secs}`;
+            } else {
+                const mins = String(Math.floor(timeRemaining / 60)).padStart(2, '0');
+                const secs = String(timeRemaining % 60).padStart(2, '0');
+                timeText = `${mins}:${secs}`;
+            }
+            document.getElementById('res-time').innerText = timeText;
+
+            const feedbackEl = document.getElementById('res-feedback');
+            if (grade >= 8.0) feedbackEl.innerText = "🎉 Xuất sắc! Bạn đã nắm rất vững đề cương giữa kỳ I.";
+            else if (grade >= 5.0) feedbackEl.innerText = "👍 Tốt! Hãy ôn lại các câu chưa đúng để đạt điểm cao hơn.";
+            else feedbackEl.innerText = "💪 Cố gắng lên! Hãy xem kỹ lời giải chi tiết bên dưới để ôn tập lại.";
+
+            document.getElementById('result-box').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            renderQuiz();
+        }
+
+        function resetQuiz() {
+            if (confirm("Xác nhận làm lại bài từ đầu?")) {
+                userAnswers = {};
+                isSubmitted = false;
+                timeRemaining = appMode === 'test' ? 45 * 60 : 0;
+                currentQuestionIndex = 0;
+                document.getElementById('result-box').classList.add('hidden');
+                startTimer();
+                renderQuiz();
+            }
+        }
+    </script>
+</body>
+</html>
